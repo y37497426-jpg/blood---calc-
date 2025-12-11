@@ -1,0 +1,862 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Калькулятор совместимости групп крови</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #e63946;
+            --secondary-color: #457b9d;
+            --dark-color: #1d3557;
+            --light-color: #f1faee;
+            --success-color: #2a9d8f;
+            --warning-color: #e9c46a;
+            --danger-color: #e76f51;
+            --border-radius: 12px;
+            --box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f8f9fa;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 20px;
+        }
+
+        h1 {
+            color: var(--dark-color);
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            color: var(--secondary-color);
+            font-size: 1.2rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .calculator {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        @media (max-width: 768px) {
+            .calculator {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background-color: white;
+            border-radius: var(--border-radius);
+            padding: 30px;
+            box-shadow: var(--box-shadow);
+            transition: var(--transition);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+        }
+
+        .card-title {
+            color: var(--dark-color);
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--light-color);
+            display: flex;
+            align-items: center;
+        }
+
+        .card-title i {
+            margin-right: 10px;
+            color: var(--primary-color);
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--dark-color);
+        }
+
+        .blood-selector {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .blood-option {
+            flex: 1;
+            min-width: 100px;
+        }
+
+        .blood-option input[type="radio"] {
+            display: none;
+        }
+
+        .blood-option label {
+            display: block;
+            padding: 12px 10px;
+            text-align: center;
+            background-color: var(--light-color);
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 700;
+            border: 2px solid transparent;
+        }
+
+        .blood-option input[type="radio"]:checked + label {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .rh-selector {
+            display: flex;
+            gap: 10px;
+        }
+
+        .rh-option {
+            flex: 1;
+        }
+
+        .rh-option input[type="radio"] {
+            display: none;
+        }
+
+        .rh-option label {
+            display: block;
+            padding: 12px 10px;
+            text-align: center;
+            background-color: var(--light-color);
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 700;
+            border: 2px solid transparent;
+        }
+
+        .rh-option input[type="radio"]:checked + label.rh-positive {
+            background-color: var(--danger-color);
+            color: white;
+            border-color: var(--danger-color);
+        }
+
+        .rh-option input[type="radio"]:checked + label.rh-negative {
+            background-color: var(--secondary-color);
+            color: white;
+            border-color: var(--secondary-color);
+        }
+
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: var(--border-radius);
+            background-color: #f8f9fa;
+            display: none;
+        }
+
+        .result.show {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .result-title {
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            color: var(--dark-color);
+        }
+
+        .compatibility {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .compatibility-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .compatible .compatibility-icon {
+            background-color: var(--success-color);
+        }
+
+        .incompatible .compatibility-icon {
+            background-color: var(--danger-color);
+        }
+
+        .warning .compatibility-icon {
+            background-color: var(--warning-color);
+        }
+
+        .compatibility-text {
+            flex: 1;
+        }
+
+        .tables {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        @media (max-width: 992px) {
+            .tables {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th {
+            background-color: var(--dark-color);
+            color: white;
+            padding: 15px;
+            text-align: left;
+        }
+
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+
+        .compatibility-cell {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .compatible-cell {
+            background-color: rgba(42, 157, 143, 0.2);
+            color: var(--success-color);
+        }
+
+        .incompatible-cell {
+            background-color: rgba(231, 111, 81, 0.2);
+            color: var(--danger-color);
+        }
+
+        .info {
+            margin-top: 40px;
+            padding: 30px;
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
+
+        .info h3 {
+            color: var(--dark-color);
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .info-points {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .info-point {
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: var(--border-radius);
+            border-left: 4px solid var(--secondary-color);
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            color: var(--secondary-color);
+            font-size: 0.9rem;
+        }
+
+        .calculate-btn {
+            display: block;
+            width: 100%;
+            padding: 16px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-top: 20px;
+        }
+
+        .calculate-btn:hover {
+            background-color: #c1121f;
+            transform: translateY(-3px);
+        }
+
+        .blood-types-info {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .blood-type-info {
+            text-align: center;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            background-color: #f8f9fa;
+            min-width: 120px;
+        }
+
+        .blood-type {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .blood-population {
+            font-size: 0.9rem;
+            color: var(--secondary-color);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-tint"></i> Калькулятор групп крови</h1>
+            <p class="subtitle">Определите совместимость групп крови для переливания и беременности. Узнайте, какие группы крови совместимы с вашей.</p>
+        </header>
+
+        <div class="calculator">
+            <div class="card">
+                <h2 class="card-title"><i class="fas fa-user-injured"></i> Для переливания крови</h2>
+                <div class="input-group">
+                    <label>Группа крови реципиента (того, кому переливают):</label>
+                    <div class="blood-selector" id="recipient-blood-group">
+                        <div class="blood-option">
+                            <input type="radio" id="recipient-a" name="recipient-blood" value="A" checked>
+                            <label for="recipient-a">A (II)</label>
+                        </div>
+                        <div class="blood-option">
+                            <input type="radio" id="recipient-b" name="recipient-blood" value="B">
+                            <label for="recipient-b">B (III)</label>
+                        </div>
+                        <div class="blood-option">
+                            <input type="radio" id="recipient-ab" name="recipient-blood" value="AB">
+                            <label for="recipient-ab">AB (IV)</label>
+                        </div>
+                        <div class="blood-option">
+                            <input type="radio" id="recipient-o" name="recipient-blood" value="O">
+                            <label for="recipient-o">O (I)</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>Резус-фактор реципиента:</label>
+                    <div class="rh-selector" id="recipient-rh-factor">
+                        <div class="rh-option">
+                            <input type="radio" id="recipient-positive" name="recipient-rh" value="+" checked>
+                            <label for="recipient-positive" class="rh-positive">Rh+</label>
+                        </div>
+                        <div class="rh-option">
+                            <input type="radio" id="recipient-negative" name="recipient-rh" value="-">
+                            <label for="recipient-negative" class="rh-negative">Rh-</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>Группа крови донора (того, от кого переливают):</label>
+                    <div class="blood-selector" id="donor-blood-group">
+                        <div class="blood-option">
+                            <input type="radio" id="donor-a" name="donor-blood" value="A">
+                            <label for="donor-a">A (II)</label>
+                        </div>
+                        <div class="blood-option">
+                            <input type="radio" id="donor-b" name="donor-blood" value="B">
+                            <label for="donor-b">B (III)</label>
+                        </div>
+                        <div class="blood-option">
+                            <input type="radio" id="donor-ab" name="donor-blood" value="AB">
+                            <label for="donor-ab">AB (IV)</label>
+                        </div>
+                        <div class="blood-option">
+                            <input type="radio" id="donor-o" name="donor-blood" value="O" checked>
+                            <label for="donor-o">O (I)</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>Резус-фактор донора:</label>
+                    <div class="rh-selector" id="donor-rh-factor">
+                        <div class="rh-option">
+                            <input type="radio" id="donor-positive" name="donor-rh" value="+" checked>
+                            <label for="donor-positive" class="rh-positive">Rh+</label>
+                        </div>
+                        <div class="rh-option">
+                            <input type="radio" id="donor-negative" name="donor-rh" value="-">
+                            <label for="donor-negative" class="rh-negative">Rh-</label>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="calculate-btn" id="calculate-transfusion">
+                    <i class="fas fa-calculator"></i> Проверить совместимость для переливания
+                </button>
+
+                <div class="result" id="transfusion-result">
+                    <h3 class="result-title">Результат совместимости для переливания</h3>
+                    <div class="compatibility" id="transfusion-compatibility">
+                        <!-- Результат будет сгенерирован JavaScript -->
+                    </div>
+                    <p id="transfusion-details"></p>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2 class="card-title"><i class="fas fa-baby"></i> Для беременности</h2>
+                <div class="input-group">
+                    <label>Группа крови матери:</label>
+                    <div class="blood-selector" id="mother-blood-group">
+                        <div class="blood-option">
+                            <input type="radio" id="mother-a" name="mother-blood" value="A" checked>
+                            <label for="mother-a">A (II)</label>
+                        </div>
+                        <div class="blood-option">
+                            <input type="radio" id="mother-b" name="mother-blood" value="B">
+                            <label for="mother-b">B (III)</label>
+                        </div>
+                        <div class="blood-option">
+                            <input type="radio" id="mother-ab" name="mother-blood" value="AB">
+                            <label for="mother-ab">AB (IV)</label>
+                        </div>
+                        <div class="blood-option">
+                            <input type="radio" id="mother-o" name="mother-blood" value="O">
+                            <label for="mother-o">O (I)</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>Резус-фактор матери:</label>
+                    <div class="rh-selector" id="mother-rh-factor">
+                        <div class="rh-option">
+                            <input type="radio" id="mother-positive" name="mother-rh" value="+">
+                            <label for="mother-positive" class="rh-positive">Rh+</label>
+                        </div>
+                        <div class="rh-option">
+                            <input type="radio" id="mother-negative" name="mother-rh" value="-" checked>
+                            <label for="mother-negative" class="rh-negative">Rh-</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>Группа крови отца:</label>
+                    <div class="blood-selector" id="father-blood-group">
+                        <div class="blood-option">
+                            <input type="radio" id="father-a" name="father-blood" value="A">
+                            <label for="father-a">A (II)</label>
+                        </div>
+                        <div class="blood-option">
+                            <input type="radio" id="father-b" name="father-blood" value="B">
+                            <label for="father-b">B (III)</label>
+                        </div>
+                        <div class="blood-option">
+                            <input type="radio" id="father-ab" name="father-blood" value="AB">
+                            <label for="father-ab">AB (IV)</label>
+                        </div>
+                        <div class="blood-option">
+                            <input type="radio" id="father-o" name="father-blood" value="O" checked>
+                            <label for="father-o">O (I)</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>Резус-фактор отца:</label>
+                    <div class="rh-selector" id="father-rh-factor">
+                        <div class="rh-option">
+                            <input type="radio" id="father-positive" name="father-rh" value="+" checked>
+                            <label for="father-positive" class="rh-positive">Rh+</label>
+                        </div>
+                        <div class="rh-option">
+                            <input type="radio" id="father-negative" name="father-rh" value="-">
+                            <label for="father-negative" class="rh-negative">Rh-</label>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="calculate-btn" id="calculate-pregnancy">
+                    <i class="fas fa-calculator"></i> Проверить риск резус-конфликта
+                </button>
+
+                <div class="result" id="pregnancy-result">
+                    <h3 class="result-title">Результат проверки для беременности</h3>
+                    <div class="compatibility" id="pregnancy-compatibility">
+                        <!-- Результат будет сгенерирован JavaScript -->
+                    </div>
+                    <p id="pregnancy-details"></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="blood-types-info">
+            <div class="blood-type-info">
+                <div class="blood-type">O (I)</div>
+                <div class="blood-population">~ 40% населения</div>
+            </div>
+            <div class="blood-type-info">
+                <div class="blood-type">A (II)</div>
+                <div class="blood-population">~ 34% населения</div>
+            </div>
+            <div class="blood-type-info">
+                <div class="blood-type">B (III)</div>
+                <div class="blood-population">~ 18% населения</div>
+            </div>
+            <div class="blood-type-info">
+                <div class="blood-type">AB (IV)</div>
+                <div class="blood-population">~ 8% населения</div>
+            </div>
+        </div>
+
+        <div class="tables">
+            <div class="card">
+                <h2 class="card-title"><i class="fas fa-heartbeat"></i> Совместимость групп крови для переливания</h2>
+                <table id="transfusion-table">
+                    <thead>
+                        <tr>
+                            <th>Группа крови реципиента</th>
+                            <th>Можно переливать от донора</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Заполнится JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="card">
+                <h2 class="card-title"><i class="fas fa-baby-carriage"></i> Резус-конфликт при беременности</h2>
+                <table id="pregnancy-table">
+                    <thead>
+                        <tr>
+                            <th>Резус матери</th>
+                            <th>Резус отца</th>
+                            <th>Риск конфликта</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Заполнится JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="info">
+            <h3>Важная информация о группах крови</h3>
+            <p>Группа крови и резус-фактор являются важными характеристиками крови, которые необходимо учитывать при переливании крови и во время беременности. Несовместимость может привести к серьезным осложнениям.</p>
+            
+            <div class="info-points">
+                <div class="info-point">
+                    <strong>Универсальный донор:</strong> Люди с группой крови O(I) Rh- могут быть донорами для всех групп крови.
+                </div>
+                <div class="info-point">
+                    <strong>Универсальный реципиент:</strong> Люди с группой крови AB(IV) Rh+ могут принимать кровь от всех групп.
+                </div>
+                <div class="info-point">
+                    <strong>Резус-конфликт:</strong> Возникает когда у матери резус-отрицательная кровь, а у плода - резус-положительная.
+                </div>
+                <div class="info-point">
+                    <strong>Профилактика резус-конфликта:</strong> Проводится с помощью анти-D иммуноглобулина на 28 неделе беременности и после родов.
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>Данный калькулятор предоставляет общую информацию и не заменяет консультацию врача.</p>
+            <p>© 2023 Калькулятор групп крови. Все права защищены.</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Данные для таблицы совместимости переливания
+            const transfusionData = [
+                { recipient: 'O (I)', donors: ['O (I)'] },
+                { recipient: 'A (II)', donors: ['O (I)', 'A (II)'] },
+                { recipient: 'B (III)', donors: ['O (I)', 'B (III)'] },
+                { recipient: 'AB (IV)', donors: ['O (I)', 'A (II)', 'B (III)', 'AB (IV)'] }
+            ];
+
+            // Данные для таблицы резус-конфликта
+            const pregnancyData = [
+                { motherRh: 'Rh+', fatherRh: 'Rh+', risk: 'Нет риска' },
+                { motherRh: 'Rh+', fatherRh: 'Rh-', risk: 'Нет риска' },
+                { motherRh: 'Rh-', fatherRh: 'Rh+', risk: 'Возможен риск' },
+                { motherRh: 'Rh-', fatherRh: 'Rh-', risk: 'Нет риска' }
+            ];
+
+            // Заполнение таблиц
+            function populateTables() {
+                // Таблица переливания
+                const transfusionTable = document.querySelector('#transfusion-table tbody');
+                transfusionTable.innerHTML = '';
+                
+                transfusionData.forEach(item => {
+                    const row = document.createElement('tr');
+                    
+                    const recipientCell = document.createElement('td');
+                    recipientCell.textContent = item.recipient;
+                    row.appendChild(recipientCell);
+                    
+                    const donorsCell = document.createElement('td');
+                    item.donors.forEach(donor => {
+                        const span = document.createElement('span');
+                        span.textContent = donor;
+                        span.classList.add('compatibility-cell', 'compatible-cell');
+                        donorsCell.appendChild(span);
+                        donorsCell.appendChild(document.createTextNode(' '));
+                    });
+                    row.appendChild(donorsCell);
+                    
+                    transfusionTable.appendChild(row);
+                });
+
+                // Таблица беременности
+                const pregnancyTable = document.querySelector('#pregnancy-table tbody');
+                pregnancyTable.innerHTML = '';
+                
+                pregnancyData.forEach(item => {
+                    const row = document.createElement('tr');
+                    
+                    const motherCell = document.createElement('td');
+                    motherCell.textContent = item.motherRh;
+                    row.appendChild(motherCell);
+                    
+                    const fatherCell = document.createElement('td');
+                    fatherCell.textContent = item.fatherRh;
+                    row.appendChild(fatherCell);
+                    
+                    const riskCell = document.createElement('td');
+                    const riskSpan = document.createElement('span');
+                    riskSpan.textContent = item.risk;
+                    riskSpan.classList.add('compatibility-cell');
+                    
+                    if (item.risk === 'Нет риска') {
+                        riskSpan.classList.add('compatible-cell');
+                    } else {
+                        riskSpan.classList.add('incompatible-cell');
+                    }
+                    
+                    riskCell.appendChild(riskSpan);
+                    row.appendChild(riskCell);
+                    
+                    pregnancyTable.appendChild(row);
+                });
+            }
+
+            // Функция проверки совместимости для переливания
+            function checkTransfusionCompatibility() {
+                const recipientBlood = document.querySelector('input[name="recipient-blood"]:checked').value;
+                const recipientRh = document.querySelector('input[name="recipient-rh"]:checked').value;
+                const donorBlood = document.querySelector('input[name="donor-blood"]:checked').value;
+                const donorRh = document.querySelector('input[name="donor-rh"]:checked').value;
+                
+                // Правила совместимости по группе крови
+                const compatibilityRules = {
+                    'O': ['O'],
+                    'A': ['O', 'A'],
+                    'B': ['O', 'B'],
+                    'AB': ['O', 'A', 'B', 'AB']
+                };
+                
+                // Проверка совместимости по группе крови
+                const bloodCompatible = compatibilityRules[recipientBlood].includes(donorBlood);
+                
+                // Проверка совместимости по резус-фактору
+                // Rh- можно переливать только Rh-, Rh+ можно переливать как Rh+, так и Rh-
+                const rhCompatible = (recipientRh === '-' && donorRh === '-') || recipientRh === '+';
+                
+                const compatible = bloodCompatible && rhCompatible;
+                
+                // Отображение результата
+                const resultDiv = document.getElementById('transfusion-result');
+                const compatibilityDiv = document.getElementById('transfusion-compatibility');
+                const detailsP = document.getElementById('transfusion-details');
+                
+                // Очищаем предыдущие классы
+                compatibilityDiv.className = 'compatibility';
+                
+                if (compatible) {
+                    compatibilityDiv.classList.add('compatible');
+                    compatibilityDiv.innerHTML = `
+                        <div class="compatibility-icon">
+                            <i class="fas fa-check"></i>
+                        </div>
+                        <div class="compatibility-text">
+                            <h4>Совместимо</h4>
+                            <p>Кровь донора совместима с кровью реципиента.</p>
+                        </div>
+                    `;
+                    
+                    detailsP.textContent = `Реципиент с группой крови ${getBloodTypeName(recipientBlood)}${recipientRh} может получить кровь от донора с группой ${getBloodTypeName(donorBlood)}${donorRh}.`;
+                } else {
+                    compatibilityDiv.classList.add('incompatible');
+                    compatibilityDiv.innerHTML = `
+                        <div class="compatibility-icon">
+                            <i class="fas fa-times"></i>
+                        </div>
+                        <div class="compatibility-text">
+                            <h4>Несовместимо</h4>
+                            <p>Кровь донора несовместима с кровью реципиента.</p>
+                        </div>
+                    `;
+                    
+                    let reason = '';
+                    if (!bloodCompatible && !rhCompatible) {
+                        reason = 'несовместимость по группе крови и резус-фактору.';
+                    } else if (!bloodCompatible) {
+                        reason = 'несовместимость по группе крови.';
+                    } else {
+                        reason = 'несовместимость по резус-фактору. Реципиент с отрицательным резус-фактором может получать кровь только от доноров с отрицательным резусом.';
+                    }
+                    
+                    detailsP.textContent = `Реципиент с группой крови ${getBloodTypeName(recipientBlood)}${recipientRh} не может получить кровь от донора с группой ${getBloodTypeName(donorBlood)}${donorRh} из-за ${reason}`;
+                }
+                
+                resultDiv.classList.add('show');
+            }
+
+            // Функция проверки риска резус-конфликта при беременности
+            function checkPregnancyCompatibility() {
+                const motherBlood = document.querySelector('input[name="mother-blood"]:checked').value;
+                const motherRh = document.querySelector('input[name="mother-rh"]:checked').value;
+                const fatherBlood = document.querySelector('input[name="father-blood"]:checked').value;
+                const fatherRh = document.querySelector('input[name="father-rh"]:checked').value;
+                
+                // Резус-конфликт возникает только если мать Rh-, а отец Rh+
+                const rhConflictRisk = motherRh === '-' && fatherRh === '+';
+                
+                // Отображение результата
+                const resultDiv = document.getElementById('pregnancy-result');
+                const compatibilityDiv = document.getElementById('pregnancy-compatibility');
+                const detailsP = document.getElementById('pregnancy-details');
+                
+                // Очищаем предыдущие классы
+                compatibilityDiv.className = 'compatibility';
+                
+                if (!rhConflictRisk) {
+                    compatibilityDiv.classList.add('compatible');
+                    compatibilityDiv.innerHTML = `
+                        <div class="compatibility-icon">
+                            <i class="fas fa-check"></i>
+                        </div>
+                        <div class="compatibility-text">
+                            <h4>Риск резус-конфликта отсутствует</h4>
+                            <p>Резус-факторы родителей совместимы.</p>
+                        </div>
+                    `;
+                    
+                    detailsP.textContent = `У матери с резус-фактором ${motherRh === '+' ? 'Rh+' : 'Rh-'} и отца с резус-фактором ${fatherRh === '+' ? 'Rh+' : 'Rh-'} риск резус-конфликта отсутствует.`;
+                } else {
+                    compatibilityDiv.classList.add('warning');
+                    compatibilityDiv.innerHTML = `
+                        <div class="compatibility-icon">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div class="compatibility-text">
+                            <h4>Возможен резус-конфликт</h4>
+                            <p>Требуется наблюдение врача.</p>
+                        </div>
+                    `;
+                    
+                    detailsP.textContent = `У матери с резус-отрицательной кровью (Rh-) и отца с резус-положительной кровью (Rh+) существует риск резус-конфликта при беременности. Необходимо наблюдение врача и возможное введение анти-D иммуноглобулина.`;
+                }
+                
+                resultDiv.classList.add('show');
+            }
+
+            // Вспомогательная функция для получения полного названия группы крови
+            function getBloodTypeName(code) {
+                const names = {
+                    'O': 'O (I)',
+                    'A': 'A (II)',
+                    'B': 'B (III)',
+                    'AB': 'AB (IV)'
+                };
+                return names[code];
+            }
+
+            // Инициализация
+            populateTables();
+            
+            // Обработчики событий для кнопок расчета
+            document.getElementById('calculate-transfusion').addEventListener('click', checkTransfusionCompatibility);
+            document.getElementById('calculate-pregnancy').addEventListener('click', checkPregnancyCompatibility);
+            
+            // Автоматический расчет при загрузке страницы
+            checkTransfusionCompatibility();
+            checkPregnancyCompatibility();
+        });
+    </script>
+</body>
+</html>
